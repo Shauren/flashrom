@@ -55,6 +55,7 @@ static enum amd_chipset amd_gen = CHIPSET_AMD_UNKNOWN;
 
 #define FIFO_SIZE_OLD		8
 #define FIFO_SIZE_YANGTZE	71
+uint8_t RZN32BM = 0;
 
 static int sb600_spi_send_command(struct flashctx *flash, unsigned int writecnt, unsigned int readcnt,
 				  const unsigned char *writearr, unsigned char *readarr);
@@ -146,6 +147,10 @@ static int determine_generation(struct pci_dev *dev)
 		} else if (rev == 0x4b) {
 			amd_gen = CHIPSET_PROMONTORY;
 			msg_pdbg("Promontory detected.\n");
+		} else if (rev == 0x59 || rev == 0x61) {
+			RZN32BM = mmio_readb(sb600_spibar + 0x50) & 0x1;
+			amd_gen = CHIPSET_YANGTZE;
+			msg_pdbg("Ryzen detected.\n");			
 		} else {
 			msg_pwarn("FCH device found but SMBus revision 0x%02x does not match known values.\n"
 				  "Please report this to flashrom@flashrom.org and include this log and\n"
@@ -395,7 +400,12 @@ static int set_mode(struct pci_dev *dev, uint8_t read_mode)
 static int handle_speed(struct pci_dev *dev)
 {
 	uint32_t tmp;
-	uint8_t spispeed_idx = 3; /* Default to 16.5 MHz */
+	uint8_t spispeed_idx;
+	if (amd_gen >= CHIPSET_YANGTZE) {
+		spispeed_idx = 0x1; /* Default to 33.3 MHz */
+	} else {
+		spispeed_idx = 0x3; /* Default to 16.5 MHz */
+	}
 
 	char *spispeed = extract_programmer_param("spispeed");
 	if (spispeed != NULL) {

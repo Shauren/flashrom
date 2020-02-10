@@ -6000,6 +6000,45 @@ const struct flashchip flashchips[] = {
 		.voltage	= {1695, 1950},
 	},
 
+ 	{
+ 		.vendor		= "GigaDevice",
+ 		.name		= "GD25LQ256",
+ 		.bustype	= BUS_SPI,
+ 		.manufacture_id	= GIGADEVICE_ID,
+ 		.model_id	= GIGADEVICE_GD25LQ256,
+ 		.total_size	= 32768,
+ 		.page_size	= 256,
+ 		/* OTP: 1024B total, 256B reserved; read 0x48; write 0x42, erase 0x44 */
+ 		.feature_bits	= FEATURE_WRSR_WREN | FEATURE_OTP | FEATURE_4BA,
+ 		.tested		= TEST_UNTESTED,
+ 		.probe		= probe_spi_rdid,
+ 		.probe_timing	= TIMING_ZERO,
+ 		.block_erasers	=
+ 		{
+ 			{
+ 				.eraseblocks = { {4 * 1024, 8192} },
+ 				.block_erase = spi_block_erase_20,
+ 			}, {
+ 				.eraseblocks = { {32 * 1024, 1024} },
+ 				.block_erase = spi_block_erase_52,
+ 			}, {
+ 				.eraseblocks = { {64 * 1024, 512} },
+ 				.block_erase = spi_block_erase_d8,
+ 			}, {
+ 				.eraseblocks = { {32 * 1024 * 1024, 1} },
+ 				.block_erase = spi_block_erase_60,
+ 			}, {
+ 				.eraseblocks = { {32 * 1024 * 1024, 1} },
+ 				.block_erase = spi_block_erase_c7,
+ 			}
+ 		},
+ 		.printlock	= spi_prettyprint_status_register_bp4_srwd,
+ 		.unlock		= spi_disable_blockprotect_bp4_srwd, /* TODO: 2nd status reg (read with 0x35) */
+ 		.write		= spi_chip_write_256,
+ 		.read		= spi_chip_read, /* Fast read (0x0B) and multi I/O supported */
+ 		.voltage	= {1695, 2000},
+ 	},
+
 	{
 		.vendor		= "GigaDevice",
 		.name		= "GD25LQ32",
@@ -16727,6 +16766,53 @@ const struct flashchip flashchips[] = {
 		.write		= spi_chip_write_256,
 		.read		= spi_chip_read,
 		.voltage	= {2700, 3600},
+	},
+
+	{
+		.vendor		= "Winbond",
+		.name		= "W25Q256JW",
+		.bustype	= BUS_SPI,
+		.manufacture_id	= WINBOND_NEX_ID,
+		.model_id	= WINBOND_NEX_W25Q256JW,
+		.total_size	= 32768,
+		.page_size	= 256,
+		/* supports SFDP */
+		/* OTP: 1024B total, 256B reserved; read 0x48; write 0x42, erase 0x44, read ID 0x4B */
+		/* FOUR_BYTE_ADDR: supports 4-bytes addressing mode */
+		.feature_bits	= FEATURE_WRSR_WREN | FEATURE_OTP | FEATURE_4BA,
+		.tested		= TEST_OK_PREW,
+		.probe		= probe_spi_rdid,
+		.probe_timing	= TIMING_ZERO,
+		.block_erasers	=
+		{
+			{
+				.eraseblocks = { {4 * 1024, 8192} },
+				.block_erase = spi_block_erase_21,
+			}, {
+				.eraseblocks = { {4 * 1024, 8192} },
+				.block_erase = spi_block_erase_20,
+			}, {
+				.eraseblocks = { {32 * 1024, 1024} },
+				.block_erase = spi_block_erase_52,
+			}, {
+				.eraseblocks = { {64 * 1024, 512} },
+				.block_erase = spi_block_erase_dc,
+			}, {
+				.eraseblocks = { {64 * 1024, 512} },
+				.block_erase = spi_block_erase_d8,
+			}, {
+				.eraseblocks = { {32 * 1024 * 1024, 1} },
+				.block_erase = spi_block_erase_60,
+			}, {
+				.eraseblocks = { {32 * 1024 * 1024, 1} },
+				.block_erase = spi_block_erase_c7,
+			}
+		},
+		.printlock	= spi_prettyprint_status_register_plain, /* TODO: improve */
+		.unlock		= spi_disable_blockprotect,
+		.write		= spi_chip_write_256,
+		.read		= spi_chip_read,
+		.voltage	= {1700, 1950},
 	},
 
 	{
